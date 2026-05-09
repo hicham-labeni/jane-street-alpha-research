@@ -1,14 +1,18 @@
 # Jane Street Cross-Sectional Signal Research
 
-Cross-sectional signal modeling and statistical signal evaluation using the Jane Street Real-Time Market Data Kaggle dataset.
+Research-oriented cross-sectional signal evaluation using anonymized financial market data from the Jane Street forecasting dataset.
 
-This project investigates short-horizon financial prediction using machine learning, robust forward-looking validation, and cross-sectional signal evaluation techniques.
+This project investigates whether machine-learning predictions form statistically meaningful cross-sectional ranking signals under strict forward-looking validation.
+
+The workflow focuses on ranking-based signal diagnostics such as Rank IC, signal decay, turnover analysis, and simplified market-neutral evaluation rather than realistic production trading strategy development.
 
 ---
 
 # Project Overview
 
-The objective of this research is to predict `responder_6` from anonymized market features provided in the Jane Street real-time forecasting dataset.
+The project initially started as a predictive modeling task aligned with the Jane Street forecasting competition objective: predicting `responder_6` from anonymized market features.
+
+It was progressively extended into a research-oriented signal evaluation framework designed to analyze whether model predictions exhibit stable cross-sectional ranking structure across time.
 
 The workflow focuses on:
 
@@ -17,10 +21,11 @@ The workflow focuses on:
 * weighted financial metrics
 * LightGBM baseline modeling
 * robustness diagnostics
-* cross-sectional signal evaluation
-* market-neutral ranking evaluation
+* cross-sectional ranking evaluation
+* signal persistence analysis
+* simplified market-neutral ranking diagnostics
 
-The project was developed as a quantitative research pipeline inspired by standard cross-sectional quantitative research workflows.
+The project emphasizes methodological signal evaluation techniques commonly used in quantitative research, including Rank IC analysis, signal decay evaluation, turnover diagnostics, and portfolio-level ranking analysis.
 
 ---
 
@@ -39,6 +44,8 @@ Dataset characteristics:
 * weighted evaluation metric
 
 The dataset itself is NOT included in this repository because of size and licensing constraints.
+
+Because the dataset is fully anonymized, the project focuses on statistical signal structure rather than direct economic interpretation of the predictive features.
 
 ---
 
@@ -85,6 +92,8 @@ Validation performance:
 | Initial baseline  | ~0.0045     |
 | Improved baseline | ~0.0086     |
 
+The improvement mainly resulted from methodological corrections involving temporal sampling design, leakage control, feature filtering, and validation robustness rather than model complexity alone.
+
 ---
 
 ## 4. Robustness Diagnostics
@@ -100,8 +109,8 @@ Several robustness checks were implemented:
 Main findings:
 
 * no evidence of major leakage
-* evidence of statistically consistent out-of-sample ranking structure
-* expected overfitting structure typical of financial ML
+* statistically positive out-of-sample ranking structure across validation periods
+* expected overfitting behavior typical of low signal-to-noise financial ML problems
 
 ---
 
@@ -115,7 +124,7 @@ Lag features were created using:
 * strictly past observations only
 * multiple lag horizons
 
-This experiment tested whether short-term feature memory improves predictive power.
+This experiment evaluated whether short-term feature memory improves predictive structure.
 
 ---
 
@@ -129,9 +138,11 @@ The workflow includes:
 * Rank IC evaluation
 * rolling Rank IC analysis
 * signal decay analysis
-* long-short ranking evaluation
+* simplified long-short ranking diagnostics
 * turnover estimation
 * transaction-cost-adjusted diagnostics
+
+The objective of this stage is not to claim deployable alpha generation, but to evaluate whether predictive model outputs form statistically stable ranking structure under forward-looking validation.
 
 ---
 
@@ -141,7 +152,7 @@ The workflow includes:
 
 * Positive weighted R² out-of-sample
 * Positive Rank IC
-* Stable cross-sectional ranking structure
+* Moderately stable cross-sectional ranking structure across validation periods
 
 ## Signal Diagnostics
 
@@ -153,9 +164,19 @@ Approximate validation results:
 | Positive IC observations | ~59%   |
 | Average turnover         | ~0.61  |
 
-A simplified long-short portfolio simulation was used as a statistical ranking evaluation framework rather than a realistic tradable strategy.
+A simplified market-neutral long-short framework was used as a ranking-based diagnostic tool rather than a realistic deployable trading strategy.
 
-Transaction costs were incorporated using a simplified fixed basis-point model in order to evaluate whether the ranking separation remained relatively stable after introducing basic trading frictions.
+Transaction costs were incorporated using a simplified fixed basis-point model in order to evaluate whether ranking separation remained relatively stable after introducing basic trading frictions.
+
+---
+
+# Research Limitations
+
+This project uses a fully anonymized dataset, which prevents direct economic interpretation of the predictive structure.
+
+The long-short framework is intentionally simplified and is used for ranking-based signal diagnostics rather than realistic execution modeling.
+
+Transaction costs, liquidity effects, and market impact are modeled only through simplified assumptions and should not be interpreted as production-level trading estimates.
 
 ---
 
@@ -183,4 +204,3 @@ jane-street-cross-sectional-signal-research/
 ├── README.md
 ├── requirements.txt
 └── .gitignore
-```
