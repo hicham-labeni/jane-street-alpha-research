@@ -1,4 +1,4 @@
-# Jane Street Cross-Sectional Signal Research
+# Jane Street Cross-Sectional Alpha Signal Research
 
 This project started as a predictive modeling task based on the Jane Street real-time forecasting competition and was progressively extended into a research-oriented cross-sectional signal evaluation framework.
 
