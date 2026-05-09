@@ -169,6 +169,18 @@ A simplified market-neutral long-short framework was used as a ranking-based dia
 Transaction costs were incorporated using a simplified fixed basis-point model in order to evaluate whether ranking separation remained relatively stable after introducing basic trading frictions.
 
 ---
+# Research Observations
+
+Several experiments highlighted the difficulty of extracting stable predictive structure from noisy and non-stationary financial data.
+
+For example:
+
+* stronger regularization reduced overfitting but slightly lowered predictive performance
+* symbol-level lag features did not materially improve out-of-sample ranking quality
+* validation performance varied across time regimes
+* harder out-of-sample splits significantly reduced weighted R²
+
+These observations reinforced the importance of robust validation design and signal stability analysis rather than relying purely on model complexity.
 
 # Research Limitations
 
