@@ -1,10 +1,10 @@
 # Jane Street Cross-Sectional Signal Research
 
-Research-oriented cross-sectional signal evaluation using anonymized financial market data from the Jane Street forecasting dataset.
+This project started as a predictive modeling task based on the Jane Street real-time forecasting competition and was progressively extended into a research-oriented cross-sectional signal evaluation framework.
 
-This project investigates whether machine-learning predictions form statistically meaningful cross-sectional ranking signals under strict forward-looking validation.
+The objective was initially to predict `responder_6` using machine-learning models under strict forward-looking validation, then evaluate whether the resulting predictions formed statistically meaningful cross-sectional ranking signals.
 
-The workflow focuses on ranking-based signal diagnostics such as Rank IC, signal decay, turnover analysis, and simplified market-neutral evaluation rather than realistic production trading strategy development.
+The workflow includes predictive modeling, robustness diagnostics, Rank IC analysis, signal decay evaluation, turnover analysis, and simplified market-neutral ranking diagnostics on anonymized financial market data.
 
 ---
 
