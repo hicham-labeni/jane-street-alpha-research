@@ -1,27 +1,30 @@
 # Jane Street Real-Time Market Data Forecasting (Kaggle Competition Project) 
 
-This project investigates short-horizon financial prediction using machine learning and strict forward-looking validation on the Jane Street Real-Time Market Data Kaggle dataset.
 
-The objective is to predict `responder_6` from anonymized market features while emphasizing robust validation design, leakage-aware modeling, and out-of-sample evaluation stability.
+Research-oriented machine learning workflow for short-horizon financial prediction on the Jane Street Real-Time Market Data Forecasting dataset.
+
+The project investigates weak-signal prediction under non-stationary time-series conditions using strict forward-looking validation, leakage-aware feature design, and robustness-focused evaluation.
+
+The objective is not purely leaderboard optimization, but the study of how validation protocol, temporal sampling, and preprocessing decisions affect out-of-sample predictive stability.
 
 ---
 
 # Project Overview
 
-This project was developed as a research-oriented financial machine learning workflow focused on predictive modeling under non-stationary time-series conditions.
+This project explores predictive modeling on large-scale anonymized financial market data using a statistically conservative research workflow.
 
-The workflow focuses on:
+Main research themes:
 
-* strict forward-looking validation
-* leakage-aware feature engineering
-* weighted financial evaluation metrics
-* LightGBM baseline modeling
+* strict chronological validation
+* leakage-aware feature selection
+* weak-signal detection
+* non-stationary time-series modeling
 * robustness diagnostics
 * temporal stability analysis
-* lag-feature experimentation
-* out-of-sample validation analysis
+* weighted financial evaluation metrics
+* LightGBM-based baseline modeling
 
-The main goal of the project is not to maximize leaderboard performance, but to study how methodological decisions affect predictive robustness in noisy financial datasets.
+The workflow was intentionally designed under conservative financial ML assumptions in order to obtain more realistic out-of-sample evaluation.
 
 ---
 
@@ -40,39 +43,113 @@ Dataset characteristics:
 * multiple financial instruments (`symbol_id`)
 * intraday timestamps (`date_id`, `time_id`)
 * weighted evaluation metric
+* low signal-to-noise ratio typical of financial prediction tasks
 
-The dataset itself is NOT included in this repository because of size and licensing constraints.
+The dataset itself is not included in this repository because of licensing and storage constraints.
 
-Because the dataset is fully anonymized, the project focuses on statistical predictive structure rather than direct economic interpretation of the features.
+Because the features are anonymized, the project focuses on predictive structure and validation methodology rather than direct economic interpretation.
 
 ---
 
-# Research Pipeline
+# Methodological Design
 
-## 1. Data Diagnostics
+The workflow was intentionally designed to reduce unrealistic signal inflation caused by temporal leakage or unstable validation procedures.
+
+Core methodological choices:
+
+* strictly forward-looking train/validation split
+* no random shuffling
+* explicit exclusion of target-derived predictors
+* exclusion of raw temporal index (`date_id`)
+* weighted training and weighted evaluation
+* sparse-feature filtering
+* heavy-tail stabilization through feature clipping
+* robustness-focused diagnostics
+
+The project emphasizes conservative evaluation and reproducibility over aggressive optimization.
+
+---
+
+# Data Diagnostics
 
 Initial exploratory analysis included:
 
 * missing-value analysis
-* target distribution inspection
+* target inspection
 * feature sparsity analysis
 * temporal coverage verification
+* validation-date consistency checks
+
+The dataset contains substantial missing-value structure, which was preserved because LightGBM handles missing values natively.
 
 ---
 
-## 2. Strict Time-Series Validation
+# Feature Engineering & Preprocessing
 
-Validation was performed using a strictly forward-looking split:
+Several preprocessing decisions were introduced to improve robustness:
 
-* training on earlier dates
-* validation on future dates
-* no random shuffling
+## Leakage-aware feature selection
 
-This avoids temporal leakage and produces more realistic out-of-sample evaluation.
+The following variables were excluded from the feature space:
+
+* `date_id`
+* `weight`
+* non-target `responder_*` variables
+
+This prevents the model from exploiting target-related or regime-specific information that may not generalize out-of-sample.
+
+## Sparse-feature filtering
+
+Features with excessive missing-value ratios were removed using:
+
+```python
+missing_ratio < 0.8
+```
+
+## Heavy-tail stabilization
+
+Financial predictors exhibited heavy-tailed distributions.
+
+Feature values were clipped using:
+
+```python
+X.clip(-5, 5)
+```
+
+to reduce instability in tree-based splits.
 
 ---
 
-## 3. Baseline LightGBM Model
+# Temporal Sampling Strategy
+
+An early baseline using contiguous recent periods produced unstable validation performance.
+
+To improve regime coverage while preserving manageable local training constraints, the project used sparse chronological sampling:
+
+```python
+date_id[::20]
+```
+
+This allowed the model to observe multiple temporal regimes while keeping memory usage tractable.
+
+---
+
+# Validation Framework
+
+Validation was performed using a strictly chronological split:
+
+```python
+train: date_id < cutoff_date
+valid: date_id ≥ cutoff_date
+```
+
+No shuffling or random cross-validation was used.
+
+This setup provides a more realistic approximation of forward-looking financial prediction pipelines.
+
+---
+
+# Baseline Model
 
 Main modeling choices:
 
@@ -80,100 +157,108 @@ Main modeling choices:
 * weighted training
 * competition-aligned weighted zero-mean R²
 * native missing-value handling
-* feature clipping for heavy-tailed distributions
-* sparse-feature filtering
+* categorical handling of `symbol_id`
+* early stopping
+* moderate regularization
 
-Validation performance:
+Main hyperparameters:
 
-| Model | Weighted R² |
+```python
+learning_rate = 0.03
+num_leaves = 128
+min_data_in_leaf = 50
+feature_fraction = 0.8
+bagging_fraction = 0.8
+lambda_l2 = 2.0
+```
+
+---
+
+# Validation Results
+
+| Experiment | Weighted R² |
 |---|---|
 | Initial baseline | ~0.0045 |
 | Improved baseline | ~0.0086 |
+| Harder OOS split | ~0.0031 |
+| Stronger regularization | ~0.0082 |
 
-The improvement mainly resulted from methodological corrections involving temporal sampling, validation design, leakage control, and feature preprocessing rather than increasing model complexity alone.
+Additional observations:
+
+* ~85.7% of validation dates produced positive scores
+* shuffled-target testing produced near-zero performance
+* harder out-of-sample splits significantly reduced predictive performance
+* validation performance varied across temporal regimes
+
+These observations are consistent with low signal-to-noise financial prediction problems.
 
 ---
 
-## 4. Robustness Diagnostics
+# Robustness Diagnostics
 
 Several robustness checks were implemented:
 
-* leakage checks
-* harder out-of-sample validation splits
+* leakage diagnostics
 * shuffled-target testing
-* validation stability across dates
-* overfitting diagnostics
+* harder out-of-sample validation
+* date-level validation stability
+* overfitting analysis
+* regularization sensitivity testing
 
 Main observations:
 
-* no evidence of major leakage
+* no obvious leakage patterns detected
 * positive out-of-sample predictive signal
-* expected overfitting structure typical of financial ML problems
-* reduced performance under harder validation regimes
-
----
-
-## 5. Lag Feature Experiment
-
-Additional lagged features were tested to evaluate short-term temporal persistence effects.
-
-Lag features were constructed using:
-
-* grouped symbol history
-* strictly past observations only
-* multiple lag horizons
-
-This experiment evaluated whether short-term memory effects improved predictive performance.
-
----
-
-# Key Results
-
-Main observations obtained during validation:
-
-| Metric | Value |
-|---|---|
-| Initial weighted R² | ~0.0045 |
-| Improved weighted R² | ~0.0086 |
-| Harder OOS weighted R² | ~0.0031 |
-| Positive validation dates | ~85.7% |
-
-The experiments highlighted the importance of validation methodology, temporal sampling design, and leakage control in financial prediction tasks.
+* expected overfitting structure typical of financial ML tasks
+* weaker performance under harder validation regimes
 
 ---
 
 # Research Observations
 
-Several experiments illustrated the difficulty of extracting stable predictive structure from noisy and non-stationary financial datasets.
+The experiments highlighted several important properties of financial ML workflows:
 
-For example:
-
-* stronger regularization slightly reduced predictive performance
-* validation performance varied across time regimes
-* harder out-of-sample splits significantly reduced weighted R²
 * methodological choices impacted performance more than model complexity alone
+* stronger regularization slightly reduced predictive strength
+* signal quality varied across time regimes
+* validation protocol design strongly affected measured performance
+* temporal sampling materially influenced signal stability
 
-These observations reinforced the importance of robust validation and careful research design in financial machine learning workflows.
+The project reinforces the importance of conservative validation design in non-stationary financial datasets.
 
 ---
 
-# Research Limitations
+# Limitations
 
-This project uses a fully anonymized dataset, which prevents direct economic interpretation of the predictive structure.
+This project uses a fully anonymized dataset, which prevents direct economic interpretation of the learned predictive structure.
 
-As a result, the project focuses on predictive modeling methodology and statistical validation rather than realistic trading strategy construction or execution modeling.
+The workflow therefore focuses on statistical prediction methodology rather than trading strategy construction, portfolio optimization, or execution modeling.
+
+---
+
+# Future Work
+
+Potential extensions include:
+
+* rolling walk-forward validation
+* lag-based feature engineering
+* cross-sectional normalization
+* regime-aware modeling
+* feature-neutralization experiments
+* ensemble methods
+* more advanced temporal validation frameworks
 
 ---
 
 # Technologies Used
 
 * Python
-* Jupyter Notebook
 * Pandas
 * NumPy
 * LightGBM
-* Matplotlib
 * Scikit-learn
+* Matplotlib
+* Jupyter Notebook
 
 ---
 
@@ -189,3 +274,4 @@ jane-street-financial-forecasting-research/
 ├── README.md
 ├── requirements.txt
 └── .gitignore
+```
