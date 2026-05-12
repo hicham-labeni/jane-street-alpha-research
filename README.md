@@ -147,9 +147,8 @@ The target exhibits heavy-tailed behavior and unstable cumulative dynamics over 
 ## Cumulative weighted responder_6
 
 <p align="center">
-<img src="cumulative_responder6.png" width="800">
+  <img src="rolling_responder6.png" width="800">
 </p>
-
 # Validation Framework
 
 Validation was performed using a strictly chronological split:
